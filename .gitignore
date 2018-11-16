@@ -1,0 +1,8 @@
+# Ignore all in /sim folder
+sim/
+
+# Unignore .tcl and .do files
+!sim/*.tcl
+!sim/*.do
+
+.bak
