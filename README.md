@@ -14,7 +14,7 @@ Chips implemented:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Western: SN74LS253
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; USSR: К555КП12 / K555KP7
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; USSR: К555КП12 / K555KP12
 
 
 * Quad 2 to 1 data selector / multiplexer
