@@ -134,22 +134,22 @@ always_ff @(posedge C or negedge nR or negedge nS) begin
 	if (nR == 0 && nS == 0) // Special handling for SN7474 series behavior
 	begin
 		Q <= #dff7474_delay 1'b1;
-		nQ <= 1'b1;
+		nQ <= #dff7474_delay 1'b1;
 	end
 	else if (nR == 0)
 	begin
 		Q <= #dff7474_delay 1'b0;
-		nQ <= 1'b1;
+		nQ <= #dff7474_delay 1'b1;
 	end
 	else if (nS == 0)
 	begin
 		Q <= #dff7474_delay 1'b1;
-		nQ <= 1'b0;
+		nQ <= #dff7474_delay 1'b0;
 	end
 	else
 	begin
 		Q <= #dff7474_delay D;
-		nQ <= ~D;
+		nQ <= #dff7474_delay ~D;
 	end
 end
 
