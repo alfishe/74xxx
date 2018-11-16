@@ -125,28 +125,30 @@ module dff_7474
 	output reg Q,
 	output reg nQ
 );
+// Simulation delay
+localparam dff7474_delay = 1;
 
 //assign nQ = ~Q;
 
 always_ff @(posedge C or negedge nR or negedge nS) begin
 	if (nR == 0 && nS == 0) // Special handling for SN7474 series behavior
 	begin
-		Q <= 1'b1;
+		Q <= #dff7474_delay 1'b1;
 		nQ <= 1'b1;
 	end
 	else if (nR == 0)
 	begin
-		Q <= 1'b0;
+		Q <= #dff7474_delay 1'b0;
 		nQ <= 1'b1;
 	end
 	else if (nS == 0)
 	begin
-		Q <= 1'b1;
+		Q <= #dff7474_delay 1'b1;
 		nQ <= 1'b0;
 	end
 	else
 	begin
-		Q <= D;
+		Q <= #dff7474_delay D;
 		nQ <= ~D;
 	end
 end
