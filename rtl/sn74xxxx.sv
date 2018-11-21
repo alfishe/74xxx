@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 
 // Purpose: 3-line to 8-line decoder / demultiplexer
 // Western: SN74LS138A/SN54LS138/SN54S138
@@ -106,13 +107,36 @@ endmodule
 // Purpose: Quad 2 to 1 data selector / multiplexer
 // Western: SN74LS157
 // USSR: K555KP16
-module selector_74157
+module multiplexer_74157
 (
+	input [3:0] a,
+	input [3:0] b,
+	input select,
+	input strobe_n,
+
+	output [3:0] y
 );
+// Simulation delay
+localparam multiplexer_74157_delay = 9; // 9ns typical average propagation delay
+
+genvar i;
+logic [3:0] output_values;
+
+generate
+	for (i = 0; i <= 3; i++)
+	begin
+		// Set output values based on select signal (A for select = 'b0, B for select = 'b1)
+		assign output_values[i] = (select) ? b[i] : a[i];
+
+		// React on strobe_n signal. Allow output values only on strobe_n = 'b0 (active). Make outputs low (zero) otherwise.
+		assign #multiplexer_74157_delay y[i] = (strobe_n) ? 1'b0 : output_values[i];
+	end
+endgenerate
+
 
 endmodule
 
-// Purpose D flip-flop
+// Purpose: D flip-flop
 // Western: SN74LS74
 // USSR: K555TM2
 module dff_7474
@@ -126,30 +150,30 @@ module dff_7474
 	output reg nQ
 );
 // Simulation delay
-localparam dff7474_delay = 1;
+localparam dff_7474_delay = 1;
 
 //assign nQ = ~Q;
 
 always_ff @(posedge C or negedge nR or negedge nS) begin
 	if (nR == 0 && nS == 0) // Special handling for SN7474 series behavior
 	begin
-		Q <= #dff7474_delay 1'b1;
-		nQ <= #dff7474_delay 1'b1;
+		Q <= #dff_7474_delay 1'b1;
+		nQ <= #dff_7474_delay 1'b1;
 	end
 	else if (nR == 0)
 	begin
-		Q <= #dff7474_delay 1'b0;
-		nQ <= #dff7474_delay 1'b1;
+		Q <= #dff_7474_delay 1'b0;
+		nQ <= #dff_7474_delay 1'b1;
 	end
 	else if (nS == 0)
 	begin
-		Q <= #dff7474_delay 1'b1;
-		nQ <= #dff7474_delay 1'b0;
+		Q <= #dff_7474_delay 1'b1;
+		nQ <= #dff_7474_delay 1'b0;
 	end
 	else
 	begin
-		Q <= #dff7474_delay D;
-		nQ <= #dff7474_delay ~D;
+		Q <= #dff_7474_delay D;
+		nQ <= #dff_7474_delay ~D;
 	end
 end
 

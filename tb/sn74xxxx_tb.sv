@@ -279,6 +279,90 @@ end
 
 endmodule
 
+module multiplexer_74157_tb();
+logic [3:0] a;
+logic [3:0] b;
+logic select;
+logic strobe_n;
+logic [3:0] y;
+
+integer i;
+integer j;
+integer k;
+reg [2:0] stimulus;
+
+multiplexer_74157 DUT
+(
+	.a(a),
+	.b(b),
+	.select(select),
+	.strobe_n(strobe_n),
+	.y(y)
+);
+
+initial begin
+  // Set up time printing format to nanoseconds with no decimal precision digits
+  // $timeformat [ ( units_number , precision_number , suffix_string , minimum_field_width ) ] ;
+  $timeformat(-9, 0, " ns", 3);
+
+  // Set initial state
+  select = 1'b0;
+  strobe_n = 1'b1;
+  for (i = 0; i <= 3; i++)
+  begin
+  	a[i] = 1'b0;
+ 	b[i] = 1'b0;
+  end
+  #10
+
+  // Bruteforce all possible combinations (within valid timings)
+  for (j = 0; j <= 3; j++)
+  begin
+  	  stimulus = j;
+  	  strobe_n = stimulus[0];
+  	  select = stimulus[1];
+
+	  for (i = 0; i <= 31; i++)
+	  begin
+	  	a = i[3:0];
+	  	b = i[7:4];
+	  	#10;
+
+	  	for (k = 0; k <= 3; k++)
+	  	begin
+	  	  test_single_multiplexer(strobe_n, select, a[k], b[k], y[k]);
+	  	end
+  	  end
+  end
+
+  // Corner cases
+  a = 4'b0101;
+  b = 4'b1010;
+  
+end
+
+task test_single_multiplexer
+(
+	input strobe_n,
+	input select,
+	input A,
+	input B,
+	input Y
+);
+
+// Verification over truth table from datasheet
+casex ( { strobe_n, select, A, B })
+	'b1xxx: assert (Y == 0) else $display("[%t]: Expected Y=0, found Y=%b for strobe_n=%b, select=%b, A=%b, B=%b", $time, Y, strobe_n, select, A, B);
+	'b000x: assert (Y == 0) else $display("[%t]: Expected Y=0, found Y=%b for strobe_n=%b, select=%b, A=%b, B=%b", $time, Y, strobe_n, select, A, B);
+	'b001x: assert (Y == 1) else $display("[%t]: Expected Y=1, found Y=%b for strobe_n=%b, select=%b, A=%b, B=%b", $time, Y, strobe_n, select, A, B);
+	'b01x0: assert (Y == 0) else $display("[%t]: Expected Y=0, found Y=%b for strobe_n=%b, select=%b, A=%b, B=%b", $time, Y, strobe_n, select, A, B);
+	'b01x1: assert (Y == 1) else $display("[%t]: Expected Y=1, found Y=%b for strobe_n=%b, select=%b, A=%b, B=%b", $time, Y, strobe_n, select, A, B);
+endcase
+
+endtask
+
+endmodule
+
 module dff_7474_tb();
 reg nR;
 reg D;
