@@ -505,3 +505,278 @@ initial begin
 end
 
 endmodule
+
+module counter_74193_tb();
+logic clr;
+logic up;
+logic down;
+logic load_n;
+logic [3:0] P;
+logic co_n;
+logic bo_n;
+logic [3:0] Q;
+
+counter_74193 DUT
+(
+  .clr(clr),
+  .up(up),
+  .down(down),
+  .load_n(load_n),
+  .P(P),
+
+  .co_n(co_n),
+  .bo_n(bo_n),
+  .Q(Q)
+);
+
+initial begin
+  clr = 1'b0;
+  up = 1'b1;
+  down = 1'b1;
+  load_n = 1'b1;
+  P = 4'b1111;
+  #10;
+  clr = 1'b1;
+  #10;
+  clr = 1'b0;
+  #10;
+
+  // Test 1: counting up through 15 and ripple count overflow flag set
+  P = 4'b0000;
+  load_n = 1'b0;
+  #10;
+  load_n = 1'b1;
+  #10;
+
+  for (int i = 0; i <= 20; i++)
+  begin
+    up = 1'b0;
+    #5;
+    up = 1'b1;
+    #5;
+  end
+
+  // Delimiter between tests
+  P = 4'bxxxx;
+  up = 1'bx;
+  down = 1'bx;
+  clr = 1'bx;
+  #10;
+  clr = 1'b0;
+  up = 1'b0;
+  down = 1'b0;
+  // End of delimiter between tests
+
+  // Test 2: counding down through zero and borrow flag set
+  P = 4'b1111;
+  up = 1'b0;
+  load_n = 1'b0;
+  #10;
+  load_n = 1'b1;
+  #10;
+
+  for (int i = 20; i >= 0; i--)
+  begin
+    down = 1'b0;
+    #5;
+    down = 1'b1;
+    #5;
+  end
+end
+
+endmodule
+
+module counter_74169_tb();
+logic clk;
+logic direction;
+logic load_n;
+logic ent_n;
+logic enp_n;
+logic [3:0] P;
+logic rco_n;
+logic [3:0] Q;
+
+counter_74169 DUT
+(
+  .clk(clk),
+  .direction(direction),
+  .load_n(load_n),
+  .ent_n(ent_n),
+  .enp_n(enp_n),
+  .P(P),
+  .rco_n(rco_n),
+  .Q(Q)
+);
+
+initial begin
+  // Set up time printing format to nanoseconds with no decimal precision digits
+  // $timeformat [ ( units_number , precision_number , suffix_string , minimum_field_width ) ] ;
+  $timeformat(-9, 0, " ns", 3);
+
+  clk = 1'b0;
+  enp_n = 1'b1;
+  ent_n = 1'b1;
+  load_n = 1'b1;
+  P = 4'b1111;
+  #5;
+  load_n = 1'b0;
+  #10;
+  load_n = 1'b1;
+  #5;
+
+  // Test 1: Count up from 0 to 15 through ripple count set and overflow
+  direction = 1'b1;
+  P = 4'b0000;
+  load_n = 1'b0;
+  #10;
+  load_n = 1'b1;
+  #10;
+
+  for (int i = 0; i <= 20; i++)
+  begin
+    enp_n = 1'b0;
+    ent_n = 1'b0;
+    #10;
+    enp_n = 1'b1;
+    ent_n = 1'b1;
+  end
+
+  // Delimiter between tests
+  P = 4'bxxxx;
+  direction = 1'bx;
+  enp_n = 1'bx;
+  ent_n = 1'bx;
+  load_n = 1'bx;
+  #10;
+  // End of delimiter between tests
+
+  // Test 2: Count down from 15 to 0 through ripple count set and overflow
+  direction = 1'b0;
+  P = 4'b1111;
+  load_n = 1'b0;
+  #10;
+  load_n = 1'b1;
+  #10;
+
+  for (int i = 20; i >= 0; i--)
+  begin
+    enp_n = 1'b0;
+    ent_n = 1'b0;
+    #10;
+    enp_n = 1'b1;
+    ent_n = 1'b1;
+  end
+
+  // Delimiter between tests
+  P = 4'bxxxx;
+  direction = 1'bx;
+  enp_n = 1'bx;
+  ent_n = 1'bx;
+  load_n = 1'bx;
+  #10;
+  // End of delimiter between tests
+end
+
+// 100MHz clock
+always #5 clk = ~clk;
+
+// Force stop after 1000ns
+initial begin
+  #1000 $stop;
+end
+
+endmodule
+
+module counter_74163_tb();
+logic clk;
+logic clr_n;
+logic enp;
+logic ent;
+logic load_n;
+logic [3:0] P;
+logic [3:0] Q;
+
+counter_74163 DUT
+(
+  .clk(clk),
+  .clr_n(clr_n),
+  .enp(enp),
+  .ent(ent),
+  .load_n(load_n),
+  .P(P),
+
+  .Q(Q),
+  .rco(rco)
+);
+
+initial begin
+  // Set up time printing format to nanoseconds with no decimal precision digits
+  // $timeformat [ ( units_number , precision_number , suffix_string , minimum_field_width ) ] ;
+  $timeformat(-9, 0, " ns", 3);
+
+  clk = 1'b0;
+  enp = 1'b0;
+  ent = 1'b0;
+  load_n = 1'b1;
+  P = 4'b1111;
+  clr_n = 1'b0;
+  #10;
+
+  // Release reset state
+  clr_n = 1'b1;
+  #10;
+
+  // Load zero as initial counter state
+  P = 4'b0000;
+  #10
+  load_n = 1'b0;
+  #10
+  load_n = 1'b1;
+  #10;
+
+  for (int i = 0; i <= 20; i++)
+  begin
+    enp = 1'b1;
+    ent = 1'b1;
+    #10;
+  end
+
+  // Test inhibition (both enp and ent have to be raised to continue counting)
+  enp = 1'b0;
+  ent = 1'b1;
+  #50;
+  enp = 1'b1;
+  ent = 1'b0;
+  #50;
+
+  for (int i = 0; i <= 10; i++)
+  begin
+    if (i <= 5)
+    begin
+      enp = i % 2;
+      ent = 1'b1;
+    end
+    else
+    begin
+      enp = 1'b1;
+      ent = i % 2;
+    end
+    #10;
+  end
+
+  // Delimiter between tests
+  P = 4'bxxxx;
+  enp = 1'bx;
+  ent = 1'bx;
+  load_n = 1'bx;
+  #10;
+  // End of delimiter between tests
+
+  #50
+  $stop;
+end
+
+// 100MHz clock
+always #5 clk = ~clk;
+
+endmodule

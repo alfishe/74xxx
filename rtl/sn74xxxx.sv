@@ -2,7 +2,7 @@
 
 // Purpose: 3-line to 8-line decoder / demultiplexer
 // Western: SN74LS138A/SN54LS138/SN54S138
-// USSR: K555ID7
+// USSR: K555ID7/К555ИД7
 module decoder_74138
 (
 	input [2:0] x,	// (A, B, C)
@@ -73,7 +73,7 @@ endmodule
 
 // Purpose: Dual 4 to 1 line selector/multiplexer
 // Western: SN74LS253
-// USSR: K555KP12
+// USSR: K555KP12/К555КП12
 module selector_74253
 (
 	input [3:0] input_1c,				// (1C0, 1C1, 1C2, 1C3)
@@ -106,7 +106,7 @@ endmodule
 
 // Purpose: Quad 2 to 1 data selector / multiplexer
 // Western: SN74LS157
-// USSR: K555KP16
+// USSR: K555KP16/К555КП16
 module multiplexer_74157
 (
 	input [3:0] a,
@@ -138,7 +138,7 @@ endmodule
 
 // Purpose: D flip-flop
 // Western: SN74LS74
-// USSR: K555TM2
+// USSR: K555TM2/К555ТМ2
 module dff_7474
 (
 	input nR,
@@ -176,5 +176,151 @@ always_ff @(posedge C or negedge nR or negedge nS) begin
 		nQ <= #dff_7474_delay ~D;
 	end
 end
+
+endmodule
+
+// Purpose: Presettable 4-bit binary up/down counter
+// Western: SN74LS193
+// USSR: 555IE7/555ИЕ7
+module counter_74193
+(
+  input clr,
+  input up,
+  input down,
+  input load_n,    // Initial counter value load strobe
+  input [3:0] P,   // 4-bit parallel input
+
+  output co_n,      // Carry-out
+  output bo_n,     // Borrow-our
+  output [3:0] Q
+);
+
+localparam counter_74193_delay = 20; // Data setup time
+
+reg co;
+reg bo;
+reg [3:0] count;
+
+always_ff @(posedge clr or negedge load_n or posedge up or posedge down)
+begin
+  if (clr)
+  begin
+    count <= 4'b0000;
+    co <= 1'b0;
+    bo <= 1'b0;
+  end
+  else if (~load_n)
+    count <= P;
+  else if (up)
+  begin
+    count <= count + 1;
+    co <= ~count[0] & count[1] & count[2] & count[3] & up; // Set carry-out flag when counted till 14 ('b1110) and up is active (high)
+    bo <= 1'b0;
+  end
+  else if (down)
+  begin
+    count <= count - 1;
+    co <= 1'b0;
+    bo <= ~(~count[0] | count[1] | count[2] | count[3]) & down; // Set borrow out flag when counted till 1 ('b0001) and down is active (high)
+  end
+end
+
+assign Q = count;
+assign co_n = ~co;
+assign bo_n = ~bo;
+
+endmodule
+
+// Purpose: Synchronous 4-bit up/down binary counter
+// Western: 74sn169
+// USSR: 555IE17/555ИЕ17
+module counter_74169
+(
+  input clk,
+  input direction, // 1 = Up, 0 = Down
+  input load_n,    // 1 = Count, 0 = Load
+  input ent_n,
+  input enp_n,
+  input [3:0] P,
+
+  output rco_n,    // Ripple Carry-out (RCO)
+  output [3:0] Q   // 4-bit output
+);
+
+localparam counter_74169_delay = 20; // Min propagation delay from datasheet
+
+reg rco;
+reg [3:0] count;
+
+always_ff @(posedge clk) begin
+  if (~load_n)
+  begin
+    count <= P;
+    rco <= 1'b1;
+  end
+  else if (~ent_n & ~enp_n) // Count only if both enable signals are active (low)
+  begin
+    if (direction)
+    begin
+      // Counting up
+      count <= count + 1;
+      rco <= ~count[0] & count[1] & count[2] & count[3] & ~ent_n;    // Counted till 14 ('b1110) and active (low) ent_n
+    end
+    else
+    begin
+      // Counting down
+      count <= count - 1;
+      rco <= ~(~count[0] | count[1] | count[2] | count[3]) & ~ent_n; // Counted till 1 ('b0001) and active (low) ent_n
+    end
+  end
+end
+
+assign Q = count;
+assign rco_n = ~rco;
+
+endmodule
+
+// Purpose: 4 bit fully synchronous binary counter
+// Western: 74LS163
+// USSR: K555IE18/К555ИЕ18
+module counter_74163
+(
+  input clk,
+  input clr_n,
+  input enp,
+  input ent,
+  input load_n,
+  input [3:0] P,   // 4-bit parallel input
+
+  output [3:0] Q,  // Parallel outputs
+  output rco
+);
+
+localparam counter_74163 = 20; // Propagation delay from datasheet
+
+reg overflow;
+reg [3:0] count;
+
+always_ff @(posedge clk or negedge clr_n)
+begin
+  if (~clr_n)
+  begin
+    count <= 4'b0000;
+    overflow <= 1'b0;
+  end
+  else if (~load_n)
+  begin
+    count <= P;
+    overflow <= 1'b0;
+  end
+  else if (enp & ent)
+  begin
+    count <= count + 1;
+    overflow <= count[3] & count[2] & count[1] & ~count[0] & ent; // Counted till 14 ('b1110) and ent is active (high)
+  end
+end
+
+assign Q = count;
+assign rco = overflow;
 
 endmodule
