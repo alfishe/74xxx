@@ -95,13 +95,72 @@ end
 
 endmodule
 
+module selector_74257_tb();
+logic [1:0] P [3:0];
+logic select;
+logic g_n;
+logic [3:0] Y;
+
+selector_74257 DUT
+(
+  .P(P),
+  .select(select),
+  .g_n(g_n),
+  .Y(Y)
+);
+
+initial begin
+  $display("----------------------------------------------------------");
+  $display("| MODULE |               INPUTS               | OUTPUT Y |");
+  $display("----------------------------------------------------------");
+  $display("|        | OUTPUT CONTROL | SELECT |  A    B  |    Y     |");
+  $display("----------------------------------------------------------");
+
+  // For all 4 submodules
+  for (int i = 0; i <= 3; i++)
+  begin
+  g_n = 1'b1;
+  #1;
+  $display("|   %0d    |        %b       |    x   |  x    x  |    z     |", i, g_n);
+
+  g_n = 1'b0;
+  select = 1'b0;
+  P[i][0] = 1'b0;
+  P[i][1] = 1'b1;
+  #1;
+  assert (Y[i] == 1'b0) else $error("y[%0d]=%b should reflect input A=%b when select=%b. B=%b", i, Y[i], P[i][0], select, P[i][1]);
+  $display("|   %0d    |        %b       |    %b   |  %b    x  |    %b     |", i, g_n, select, P[i][0], Y[i]);
+  P[i][0] = 1'b1;
+  P[i][1] = 1'b0;
+  #1;
+  assert (Y[i] == 1'b1) else $error("y[%0d]=%b should reflect input A=%b when select=%b. B=%b", i, Y[i], P[i][0], select, P[i][1]);
+  $display("|   %0d    |        %b       |    %b   |  %b    x  |    %b     |", i, g_n, select, P[i][0], Y[i]);
+
+  select = 1'b1;
+  P[i][0] = 1'b1;
+  P[i][1] = 1'b0;
+  #1;
+  assert (Y[i] == 1'b0) else $error("y[%0d]=%b should reflect input B=%b when select=%b. A=%b", i, Y[i], P[i][1], select, P[i][0]);
+  $display("|   %0d    |        %b       |    %b   |  x    %b  |    %b     |", i, g_n, select, P[i][1], Y[i]);
+  P[i][0] = 1'b0;
+  P[i][1] = 1'b1;
+  #1;
+  assert (Y[i] == 1'b1) else $error("y[%0d]=%b should reflect input B=%b when select=%b. A=%b", i, Y[i], P[i][1], select, P[i][0]);
+  $display("|   %0d    |        %b       |    %b   |  x    %b  |    %b     |", i, g_n, select, P[i][1], Y[i]);
+
+  $display("----------------------------------------------------------");
+  end
+end
+
+endmodule
+
 module selector_74253_tb();
-reg [3:0] input_1c;
-reg [3:0] input_2c;
-reg [1:0] select;
-reg output_control_1g_n;
-reg output_control_2g_n;
-wire [1:0] y;
+logic [3:0] input_1c;
+logic [3:0] input_2c;
+logic [1:0] select;
+logic output_control_1g_n;
+logic output_control_2g_n;
+logic [1:0] y;
 
 integer i;
 integer j;

@@ -70,6 +70,24 @@ assign y[0] = g2a_n | g2b_n | (~g1) | x[0] | x[1] | x[2];
 
 endmodule
 
+// Purpose: Quaduple 2 to 1 line selector/multiplexer
+// Western: SN74LS257
+// USSR: K555KP11/К555КП11
+module selector_74257
+(
+  input [1:0] P [3:0],  // 4 input pairs (1A+1B, 2A+2B, 3A+3B. 4A+4B)
+  input select,
+  input g_n,            // Input enable (0 = enable, 1 = disable)
+
+  output [3:0] Y        // 4 separatea outputs (1Y = 1A/1B; 2Y = 2A/2B, 3Y = 3A/3B; 4Y = 4A/4B)
+);
+
+assign Y[0] = ~g_n & P[0][select];
+assign Y[1] = ~g_n & P[1][select];
+assign Y[2] = ~g_n & P[2][select];
+assign Y[3] = ~g_n & P[3][select];
+
+endmodule
 
 // Purpose: Dual 4 to 1 line selector/multiplexer
 // Western: SN74LS253
