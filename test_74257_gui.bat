@@ -1,2 +1,2 @@
 cd sim
-vsim -do simulate_74457.tcl
+vsim -do simulate_74257.tcl
