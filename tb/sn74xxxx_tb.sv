@@ -423,16 +423,16 @@ endtask
 endmodule
 
 module dff_7474_tb();
-reg nR;
-reg D;
-reg C;
-reg nS;
-wire Q;
-wire nQ;
+logic nR;
+logic D;
+logic C;
+logic nS;
+logic Q;
+logic nQ;
 
-reg [3:0] stimulus;
-reg prevQ;
-reg prevnQ;
+logic [3:0] stimulus;
+logic prevQ;
+logic prevnQ;
 integer i;
 integer seed;
 
@@ -486,7 +486,7 @@ initial begin
       // Test validity on raising clock edge
       @(posedge C)
       begin
-        casex  ( { nS, nR, C, D } )
+        casex ( { nS, nR, C, D } )
           'b1111: assert(Q == 1 && nQ == 0) else $display("[%t]: Clock rising. Expected Q=1, nQ=0; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
           'b1110: assert(Q == 0 && nQ == 1) else $display("[%t]: Clock rising. Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
         endcase
@@ -561,6 +561,59 @@ always #5 C = ~C;
 
 initial begin
   #1000 $stop;
+end
+
+endmodule
+
+module dff_74174_tb();
+logic clr_n;
+logic clk;
+logic [5:0] D;
+logic [5:0] Q;
+
+dff_74174 DUT
+(
+  .clr_n(clr_n),
+  .clk(clk),
+  .D(D),
+  .Q(Q)
+);
+
+initial begin
+  // Set up time printing format to nanoseconds with no decimal precision digits
+  // $timeformat [ ( units_number , precision_number , suffix_string , minimum_field_width ) ] ;
+  $timeformat(-9, 0, " ns", 3);
+
+  clk = 1'b0;
+  clr_n = 1'b0;
+  D = 0;
+  #50;
+  clr_n = 1'b1;
+  #50;
+
+  for (int i = 0; i <= 63; i++)
+  begin
+    D = i;
+    clk = 1'b1;
+    #25;
+    clk = 1'b0;
+    #25;
+  end
+
+  #100;
+  D = 6'b101010;
+  #20;
+  clk = 1'b1;
+  D = 6'b010101;
+  #20;
+end
+
+
+// 20MHz clock
+//always #25 clk = ~clk;
+
+initial begin
+  #3500 $stop;
 end
 
 endmodule

@@ -159,10 +159,10 @@ endmodule
 // USSR: K555TM2/К555ТМ2
 module dff_7474
 (
-	input nR,
-	input D,
-	input C,
-	input nS,
+	input nR,  // Reset
+	input D,   // Input
+	input C,   // Clear
+	input nS,  // Set
 
 	output reg Q,
 	output reg nQ
@@ -194,6 +194,39 @@ always_ff @(posedge C or negedge nR or negedge nS) begin
 		nQ <= #dff_7474_delay ~D;
 	end
 end
+
+endmodule
+
+// Purpose: Hex D-type flip-flops with clear
+// Western: SN74LS172
+// USSR: 555TM9/555ТМ9
+module dff_74174
+(
+  input clr_n,
+  input clk,
+  input [5:0] D,  // 6-bits input
+
+  output [5:0] Q  // 6-bits output
+);
+
+// Simulation delay
+localparam dff_74174_delay = 23; // Typical propagation delay from datasheet
+
+reg [5:0] out;
+
+always_ff @(posedge clk or negedge clr_n)
+begin
+  if (~clr_n)
+  begin
+   out <= #dff_74174_delay 6'b0000000;
+  end
+  else
+  begin
+   out  <= #dff_74174_delay D;
+  end
+end
+
+assign Q = out;
 
 endmodule
 

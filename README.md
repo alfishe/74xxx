@@ -38,6 +38,13 @@ Chips implemented:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; USSR: K555TM2/К555ТМ2
 
 
+* Hex D-type flip-flops with clear
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Western: SN74LS172
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; USSR: 555TM9/555ТМ9
+
+
 * Presettable 4-bit binary up/down counter
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Western: SN74LS193
