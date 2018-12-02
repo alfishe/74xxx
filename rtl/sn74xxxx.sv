@@ -172,7 +172,7 @@ localparam dff_7474_delay = 1;
 
 //assign nQ = ~Q;
 
-always_ff @(posedge C or negedge nR or negedge nS) begin
+always_ff @(posedge C or negedge nR or negedge nS or posedge nR or posedge nS) begin
 	if (nR == 0 && nS == 0) // Special handling for SN7474 series behavior
 	begin
 		Q <= #dff_7474_delay 1'b1;
@@ -188,7 +188,7 @@ always_ff @(posedge C or negedge nR or negedge nS) begin
 		Q <= #dff_7474_delay 1'b1;
 		nQ <= #dff_7474_delay 1'b0;
 	end
-	else
+	else if (C == 1)
 	begin
 		Q <= #dff_7474_delay D;
 		nQ <= #dff_7474_delay ~D;

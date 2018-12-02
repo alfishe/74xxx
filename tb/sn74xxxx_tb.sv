@@ -433,7 +433,6 @@ logic nQ;
 logic [3:0] stimulus;
 logic prevQ;
 logic prevnQ;
-integer i;
 integer seed;
 
 dff_7474 DUT
@@ -455,53 +454,52 @@ initial begin
   nR = 1'b0;  // Reset is active (low)
   prevQ = 1'b1;
   prevnQ = 1'b0;
-
   #10;
 
-  repeat(5)
+repeat(10)
+begin
+for (int i = 0; i < (2**3 - 1); i++)
+begin
+  stimulus = i;
+
+  prevQ = Q;
+  prevnQ = nQ;
+
+  nR = stimulus[0];
+  D = stimulus[1];
+  nS = stimulus[2];
+
+  #3;
+
+  // Verification over truth table from datasheet
+  casex ( { nS, nR, C, D } )
+    'b01xx: assert(Q == 1 && nQ == 0) else $display("[%t]: Expected Q=1, nQ=0; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    'b10xx: assert(Q == 0 && nQ == 1) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    'b00xx: assert(Q == 1 && nQ == 1) else $display("[%t]: Special handling required. Expected Q=1, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    'b1111: assert(Q == 1 && nQ == 0) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    'b1110: assert(Q == 0 && nQ == 1) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    'b110x: assert(Q == prevQ && nQ == prevnQ) else $display("[%t]: Expected Q=%b (prevQ), nQ=%b (prevnQ); Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, prevQ, prevnQ, Q, nQ, nS, nR, C, D);
+  endcase
+
+  // Test validity on raising clock edge
+  @(posedge C)
   begin
-    for (i = 0; i < 15; i++)
-    begin
-      stimulus = i;
-
-      prevQ = Q;
-      prevnQ = nQ;
-
-      nR = stimulus[0];
-      D = stimulus[1];
-      nS = stimulus[2];
-
-      #8;
-
-      // Verification over truth table from datasheet
-      casex ( { nS, nR, C, D } )
-        'b01xx: assert(Q == 1 && nQ == 0) else $display("[%t]: Expected Q=1, nQ=0; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        'b10xx: assert(Q == 0 && nQ == 1) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        'b00xx: assert(Q == 1 && nQ == 1) else $display("[%t]: Special handling required. Expected Q=1, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        'b1111: assert(Q == 1 && nQ == 0) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        'b1110: assert(Q == 0 && nQ == 1) else $display("[%t]: Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        'b110x: assert(Q == prevQ && nQ == prevnQ) else $display("[%t]: Expected Q=%b (prevQ), nQ=%b (prevnQ); Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, prevQ, prevnQ, Q, nQ, nS, nR, C, D);
-      endcase
-
-      // Test validity on raising clock edge
-      @(posedge C)
-      begin
-        casex ( { nS, nR, C, D } )
-          'b1111: assert(Q == 1 && nQ == 0) else $display("[%t]: Clock rising. Expected Q=1, nQ=0; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-          'b1110: assert(Q == 0 && nQ == 1) else $display("[%t]: Clock rising. Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
-        endcase
-      end
-    end
+    casex ( { nS, nR, C, D } )
+      'b1111: assert(Q == 1 && nQ == 0) else $display("[%t]: Clock rising. Expected Q=1, nQ=0; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+      'b1110: assert(Q == 0 && nQ == 1) else $display("[%t]: Clock rising. Expected Q=0, nQ=1; Found Q=%b, nQ=%b for nS=%b, nR=%b, C=%b, D=%b", $time, Q, nQ, nS, nR, C, D);
+    endcase
   end
+end
+end
 
-  // End test phase
-  nR = 'x;
-  nS = 'x;
-  D = 'x;
-  prevQ = 'x;
-  prevnQ = 'x;
+// End test phase
+nR = 'x;
+nS = 'x;
+D = 'x;
+prevQ = 'x;
+prevnQ = 'x;
 
-  #10;
+#10;
 
   // Exploratory testing
   /*
