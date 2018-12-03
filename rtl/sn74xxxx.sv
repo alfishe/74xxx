@@ -248,9 +248,9 @@ module counter_74193
 
 localparam counter_74193_delay = 20; // Data setup time
 
-reg co;
-reg bo;
-reg [3:0] count;
+reg co = 1'b0;
+reg bo = 1'b0;
+reg [3:0] count = 0;
 
 always_ff @(posedge clr or negedge load_n or posedge up or posedge down)
 begin
@@ -300,8 +300,8 @@ module counter_74169
 
 localparam counter_74169_delay = 20; // Min propagation delay from datasheet
 
-reg rco;
-reg [3:0] count;
+reg rco = 1'b0;
+reg [3:0] count = 0;
 
 always_ff @(posedge clk) begin
   if (~load_n)
@@ -349,8 +349,8 @@ module counter_74163
 
 localparam counter_74163 = 20; // Propagation delay from datasheet
 
-reg overflow;
-reg [3:0] count;
+reg overflow = 1'b0;
+reg [3:0] count = 0;
 
 always_ff @(posedge clk or negedge clr_n)
 begin
