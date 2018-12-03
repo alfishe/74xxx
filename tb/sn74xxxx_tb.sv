@@ -837,6 +837,7 @@ initial begin
   #10;
 
   // Load zero as initial counter state
+  $display("[%t]: Load 0 as initial value", $time);
   P = 4'b0000;
   #10
   load_n = 1'b0;
@@ -844,20 +845,23 @@ initial begin
   load_n = 1'b1;
   #10;
 
+  $display("[%t]: Regular count test", $time);
+  enp = 1'b1;
+  ent = 1'b1;
   for (int i = 0; i <= 20; i++)
   begin
-    enp = 1'b1;
-    ent = 1'b1;
     #10;
   end
 
   // Test inhibition (both enp and ent have to be raised to continue counting)
+  $display("[%t]: Inhibition started", $time);
   enp = 1'b0;
   ent = 1'b1;
   #50;
   enp = 1'b1;
   ent = 1'b0;
   #50;
+  $display("[%t]: Inhibition ended", $time);
 
   for (int i = 0; i <= 10; i++)
   begin
